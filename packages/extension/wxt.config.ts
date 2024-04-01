@@ -5,7 +5,7 @@ export default defineConfig({
   manifest: {
     name: 'Kimi Copilot',
     description: '用Kimi一键总结网页内容',
-    version: '1.1.0',
+    version: '1.2.0',
     action: {},
     permissions: ['sidePanel', 'activeTab', 'storage', 'scripting'],
     host_permissions: ['https://*.moonshot.cn/*'],
