@@ -6,6 +6,24 @@ import { KimiTokens, loadKimiAuthTokens, loadRefreshTokenFromTab, readPageConten
 const pageUrl = new URLSearchParams(location.search).get('url')!
 const tabId = new URLSearchParams(location.search).get('tabId')!
 
+function buildPrompt(pageContent: string) {
+  let prompt = `
+你是一个擅长总结长文本的助手，能够总结用户给出的文本，并生成摘要。
+
+##工作流程：
+让我们一步一步思考，阅读我提供的内容，并做出以下操作：
+- 一句话总结这篇文章，标题为“概述”
+- 总结文章内容并写成摘要，标题为“摘要”
+
+当你输出标题时，应该使用markdown ####格式。
+
+文章链接：<url>${pageUrl}</url>`.trim()
+  if (pageContent) {
+    prompt += `\n\n如果你无法访问这个链接，请根据下面的文本内容回答：\n${pageContent}`
+  }
+  return prompt
+}
+
 const SummaryPage: FC<{ tokens: KimiTokens; pageContent: string }> = ({ tokens, pageContent }) => {
   const [summary, setSummary] = useState('')
   const [chatId, setChatId] = useState('')
@@ -23,11 +41,8 @@ const SummaryPage: FC<{ tokens: KimiTokens; pageContent: string }> = ({ tokens, 
         },
       })
       const chat = await client.createChat()
-      let message = `用中文总结这个网页链接的内容：<url>${pageUrl}</url>`
-      if (pageContent) {
-        message += `\n\n如果你无法访问这个链接，请根据下面的内容进行简短的总结：\n${pageContent}`
-      }
-      for await (const event of client.sendMessage(chat.id, message, { signal: controller.signal })) {
+      const prompt = buildPrompt(pageContent)
+      for await (const event of client.sendMessage(chat.id, prompt, { signal: controller.signal })) {
         if (event.type === 'message') {
           setSummary(event.data)
         } else if (event.type === 'urls') {
@@ -48,10 +63,12 @@ const SummaryPage: FC<{ tokens: KimiTokens; pageContent: string }> = ({ tokens, 
   return (
     <div>
       <h2 className="text-lg font-bold mb-3">总结</h2>
-      {(summary || !error) && (
+      {summary ? (
         <article className="prose prose-sm">
-          <Markdown>{summary || '读取中...'}</Markdown>
+          <Markdown>{summary}</Markdown>
         </article>
+      ) : (
+        !error && <Generating />
       )}
       {!!error && <div className="text-red-500 text-sm mt-1">{error}</div>}
       {!!chatId && (
@@ -66,6 +83,17 @@ const SummaryPage: FC<{ tokens: KimiTokens; pageContent: string }> = ({ tokens, 
       )}
     </div>
   )
+}
+
+const Generating: FC = () => {
+  const [dots, setDots] = useState('.')
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setDots((dots) => (dots.length >= 3 ? '' : dots + '.'))
+    }, 500)
+    return () => clearInterval(timer)
+  }, [])
+  return <span className="text-sm">读取中{dots}</span>
 }
 
 const Login: FC<{ setTokens: (tokens: KimiTokens) => void }> = (props) => {
