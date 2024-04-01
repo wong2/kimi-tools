@@ -62,9 +62,9 @@ const SummaryPage: FC<{ tokens: KimiTokens; pageContent: string }> = ({ tokens, 
 
   return (
     <div>
-      <h2 className="text-lg font-bold mb-3">总结</h2>
+      <h2 className="text-lg font-bold mb-5">总结</h2>
       {summary ? (
-        <article className="prose prose-sm">
+        <article className="prose prose-sm dark:prose-invert">
           <Markdown>{summary}</Markdown>
         </article>
       ) : (
