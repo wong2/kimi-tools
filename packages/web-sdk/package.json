@@ -1,0 +1,11 @@
+{
+  "name": "@kimi-tools/web-sdk",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "main": "index.js",
+  "dependencies": {
+    "eventsource-parser": "^1.1.2",
+    "ofetch": "^1.3.4"
+  }
+}
