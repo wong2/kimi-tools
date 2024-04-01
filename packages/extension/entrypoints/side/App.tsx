@@ -61,7 +61,7 @@ const SummaryPage: FC<{ tokens: KimiTokens; pageContent: string }> = ({ tokens, 
           rel="noreferrer"
           className="text-blue-500 text-sm mt-3 font-medium block"
         >
-          去Kimi继续提问
+          去Kimi继续对话
         </a>
       )}
     </div>
