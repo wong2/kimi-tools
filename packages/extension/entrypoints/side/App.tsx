@@ -2,6 +2,7 @@ import { KimiWebClient } from '@kimi-tools/web-sdk'
 import Markdown from 'react-markdown'
 import { FC, useCallback, useEffect, useState } from 'react'
 import { KimiTokens, loadKimiAuthTokens, loadRefreshTokenFromTab, readPageContent, setKimiAuthTokens } from './utils'
+import { posthog } from './posthog'
 
 const pageUrl = new URLSearchParams(location.search).get('url')!
 const tabId = new URLSearchParams(location.search).get('tabId')!
@@ -136,6 +137,7 @@ export default function App() {
       }
       setLoading(false)
     })
+    posthog.capture('$pageview', { $current_url: 'side.html', tabUrl: pageUrl })
   }, [])
 
   if (loading) {
