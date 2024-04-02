@@ -73,14 +73,12 @@ const SummaryPage: FC<{ tokens: KimiTokens; pageContent: string }> = ({ tokens, 
       )}
       {!!error && <div className="text-red-500 text-sm mt-1">{error}</div>}
       {!!chatId && (
-        <a
-          href={`https://kimi.moonshot.cn/chat/${chatId}`}
-          target="_blank"
-          rel="noreferrer"
-          className="text-blue-500 text-sm mt-3 font-medium block"
+        <span
+          className="text-blue-500 text-sm mt-3 font-medium block cursor-pointer"
+          onClick={() => browser.tabs.create({ url: `https://kimi.moonshot.cn/chat/${chatId}` })}
         >
           去Kimi继续对话
-        </a>
+        </span>
       )}
     </div>
   )
