@@ -16,7 +16,7 @@ function buildPrompt(pageContent: string) {
 - 一句话总结这篇文章，标题为“概述”
 - 总结文章内容并写成摘要，标题为“摘要”
 
-当你输出标题时，应该使用markdown ####格式。
+总是用中文回答；当你输出标题时，应该使用markdown ####格式。
 
 文章链接：<url>${pageUrl}</url>`.trim()
   if (pageContent) {
