@@ -3,9 +3,9 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   manifest: {
-    name: 'Kimi Copilot',
+    name: 'Kimi Copilot - 网页总结助手',
     description: '用Kimi一键总结网页内容',
-    version: '1.3.1',
+    version: '1.3.2',
     action: {},
     permissions: ['sidePanel', 'activeTab', 'storage', 'scripting'],
     host_permissions: ['https://*.moonshot.cn/*'],
