@@ -47,3 +47,21 @@ export async function readPageContent(tabId: number): Promise<string | undefined
     console.error('executeScript', e)
   }
 }
+
+export function buildPrompt(pageUrl: string, pageContent: string) {
+  let prompt = `
+你是一个擅长总结长文本的助手，能够总结用户给出的文本，并生成摘要。
+
+##工作流程：
+让我们一步一步思考，阅读我提供的内容，并做出以下操作：
+- 一句话总结这篇文章，标题为“概述”
+- 总结文章内容并写成摘要，标题为“摘要”
+
+总是用中文回答；当你输出标题时，应该使用markdown ####格式。
+
+文章链接：<url>${pageUrl}</url>`.trim()
+  if (pageContent) {
+    prompt += `\n\n如果你无法访问这个链接，请根据下面的文本内容回答：\n${pageContent}`
+  }
+  return prompt
+}

@@ -1,28 +1,50 @@
 import { KimiWebClient } from '@kimi-tools/web-sdk'
 import Markdown from 'react-markdown'
-import { FC, useCallback, useEffect, useState } from 'react'
-import { KimiTokens, loadKimiAuthTokens, loadRefreshTokenFromTab, readPageContent, setKimiAuthTokens } from './utils'
+import { FC, PropsWithChildren, useCallback, useEffect, useState } from 'react'
+import {
+  KimiTokens,
+  buildPrompt,
+  loadKimiAuthTokens,
+  loadRefreshTokenFromTab,
+  readPageContent,
+  setKimiAuthTokens,
+} from './utils'
 import { posthog } from './posthog'
 
 const pageUrl = new URLSearchParams(location.search).get('url')!
 const tabId = new URLSearchParams(location.search).get('tabId')!
 
-function buildPrompt(pageContent: string) {
-  let prompt = `
-你是一个擅长总结长文本的助手，能够总结用户给出的文本，并生成摘要。
+const Link: FC<PropsWithChildren<{ href: string }>> = ({ href, children }) => (
+  <span
+    className="text-blue-500 text-sm mt-3 font-medium block cursor-pointer"
+    onClick={() => browser.tabs.create({ url: href })}
+  >
+    {children}
+  </span>
+)
 
-##工作流程：
-让我们一步一步思考，阅读我提供的内容，并做出以下操作：
-- 一句话总结这篇文章，标题为“概述”
-- 总结文章内容并写成摘要，标题为“摘要”
+const RatingLink: FC = () => {
+  const [show, setShow] = useState(false)
 
-总是用中文回答；当你输出标题时，应该使用markdown ####格式。
+  useEffect(() => {
+    storage.getItem<number>('local:open_times').then((value) => {
+      const openTimes = (value || 0) + 1
+      storage.setItem('local:open_times', openTimes)
+      if (openTimes === 5) {
+        setShow(true)
+      }
+    })
+  }, [])
 
-文章链接：<url>${pageUrl}</url>`.trim()
-  if (pageContent) {
-    prompt += `\n\n如果你无法访问这个链接，请根据下面的文本内容回答：\n${pageContent}`
+  if (!show) {
+    return null
   }
-  return prompt
+
+  return (
+    <Link href="https://chromewebstore.google.com/detail/kimi-copilot/icmdpfpmbfijfllafmfogmdabhijlehn/reviews">
+      给个好评
+    </Link>
+  )
 }
 
 const SummaryPage: FC<{ tokens: KimiTokens; pageContent: string }> = ({ tokens, pageContent }) => {
@@ -42,7 +64,7 @@ const SummaryPage: FC<{ tokens: KimiTokens; pageContent: string }> = ({ tokens, 
         },
       })
       const chat = await client.createChat()
-      const prompt = buildPrompt(pageContent)
+      const prompt = buildPrompt(pageUrl, pageContent)
       for await (const event of client.sendMessage(chat.id, prompt, { signal: controller.signal })) {
         if (event.type === 'message') {
           setSummary(event.data)
@@ -72,12 +94,10 @@ const SummaryPage: FC<{ tokens: KimiTokens; pageContent: string }> = ({ tokens, 
       )}
       {!!error && <div className="text-red-500 text-sm mt-1">{error}</div>}
       {!!chatId && (
-        <span
-          className="text-blue-500 text-sm mt-3 font-medium block cursor-pointer"
-          onClick={() => browser.tabs.create({ url: `https://kimi.moonshot.cn/chat/${chatId}` })}
-        >
-          去Kimi继续对话
-        </span>
+        <div className="flex flex-row justify-between items-center">
+          <Link href={`https://kimi.moonshot.cn/chat/${chatId}`}>去Kimi继续对话</Link>
+          <RatingLink />
+        </div>
       )}
     </div>
   )
