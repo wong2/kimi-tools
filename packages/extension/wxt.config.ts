@@ -4,7 +4,7 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   manifest: {
     name: 'Kimi Copilot - 网页总结助手',
-    description: '用Kimi一键总结网页内容',
+    description: '用Kimi AI一键总结网页内容',
     version: '1.3.2',
     action: {},
     permissions: ['sidePanel', 'activeTab', 'storage', 'scripting'],
