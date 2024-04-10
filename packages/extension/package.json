@@ -15,7 +15,11 @@
     "postinstall": "wxt prepare"
   },
   "dependencies": {
+    "@emotion/react": "^11.11.4",
+    "@emotion/styled": "^11.11.5",
+    "@fontsource/inter": "^5.0.17",
     "@kimi-tools/web-sdk": "workspace:^",
+    "@mui/joy": "5.0.0-beta.32",
     "posthog-js": "^1.116.6",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

@@ -1,15 +1,9 @@
 import { KimiWebClient } from '@kimi-tools/web-sdk'
-import Markdown from 'react-markdown'
 import { FC, PropsWithChildren, useCallback, useEffect, useState } from 'react'
-import {
-  KimiTokens,
-  buildPrompt,
-  loadKimiAuthTokens,
-  loadRefreshTokenFromTab,
-  readPageContent,
-  setKimiAuthTokens,
-} from './utils'
+import Markdown from 'react-markdown'
+import { buildPrompt } from '~/services/prompt'
 import { posthog } from './posthog'
+import { KimiTokens, loadKimiAuthTokens, loadRefreshTokenFromTab, readPageContent, setKimiAuthTokens } from './utils'
 
 const pageUrl = new URLSearchParams(location.search).get('url')!
 const tabId = new URLSearchParams(location.search).get('tabId')!
@@ -64,7 +58,7 @@ const SummaryPage: FC<{ tokens: KimiTokens; pageContent: string }> = ({ tokens, 
         },
       })
       const chat = await client.createChat()
-      const prompt = buildPrompt(pageUrl, pageContent)
+      const prompt = await buildPrompt(pageUrl, pageContent)
       for await (const event of client.sendMessage(chat.id, prompt, { signal: controller.signal })) {
         if (event.type === 'message') {
           setSummary(event.data)
@@ -85,6 +79,15 @@ const SummaryPage: FC<{ tokens: KimiTokens; pageContent: string }> = ({ tokens, 
 
   return (
     <div>
+      <div className="mb-4 flex flex-row items-center justify-between">
+        <img src="/icon-128.png" className="size-4" />
+        <span
+          className="font-medium text-xs underline underline-offset-1 cursor-pointer"
+          onClick={() => browser.runtime.openOptionsPage()}
+        >
+          选项
+        </span>
+      </div>
       {summary ? (
         <article className="prose prose-sm dark:prose-invert">
           <Markdown>{summary}</Markdown>
@@ -94,7 +97,7 @@ const SummaryPage: FC<{ tokens: KimiTokens; pageContent: string }> = ({ tokens, 
       )}
       {!!error && <div className="text-red-500 text-sm mt-1">{error}</div>}
       {!!chatId && (
-        <div className="flex flex-row justify-between items-center">
+        <div className="flex flex-row justify-between items-center mt-3">
           <Link href={`https://kimi.moonshot.cn/chat/${chatId}`}>去Kimi继续对话</Link>
           <RatingLink />
         </div>
