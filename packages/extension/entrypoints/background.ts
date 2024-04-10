@@ -1,6 +1,6 @@
 export default defineBackground(() => {
   browser.action.onClicked.addListener((tab) => {
-    if (!tab.id || !tab.url || !tab.url.startsWith('http')) {
+    if (!tab.id || !tab.url || !tab.url.startsWith('http') || !tab.url.startsWith('file://')) {
       return
     }
     chrome.sidePanel.setOptions({
