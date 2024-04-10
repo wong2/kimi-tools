@@ -30,7 +30,7 @@ const RatingLink: FC = () => {
     storage.getItem<number>('local:open_times').then((value) => {
       const openTimes = (value || 0) + 1
       storage.setItem('local:open_times', openTimes)
-      if (openTimes === 5) {
+      if (openTimes === 3) {
         setShow(true)
       }
     })
