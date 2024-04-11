@@ -1,5 +1,6 @@
+import { posthog } from '@/services/posthog'
 import { DEFAULT_PROMPT, loadCustomPrompt, setCustomPrompt } from '@/services/prompt'
-import { Card, CardActions, CardContent, Checkbox, Chip, Divider, Link, Snackbar, Textarea, Typography } from '@mui/joy'
+import { Card, CardActions, CardContent, Chip, Divider, Snackbar, Textarea, Typography } from '@mui/joy'
 import Button from '@mui/joy/Button'
 import { useEffect, useState } from 'react'
 
@@ -20,6 +21,7 @@ export default function App() {
     } else {
       await setCustomPrompt(prompt)
     }
+    posthog.capture('save_prompt', { custom: prompt !== DEFAULT_PROMPT })
     setShowToast(true)
   }
 

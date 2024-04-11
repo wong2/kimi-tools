@@ -1,9 +1,9 @@
 import { KimiWebClient } from '@kimi-tools/web-sdk'
 import { FC, useCallback, useEffect, useState } from 'react'
 import Markdown from 'react-markdown'
+import { posthog } from '~/services/posthog'
 import { buildPrompt } from '~/services/prompt'
 import { Link, RatingLink } from './Link'
-import { posthog } from './posthog'
 import { KimiTokens, loadKimiAuthTokens, loadRefreshTokenFromTab, readPageContent, setKimiAuthTokens } from './utils'
 
 const pageUrl = new URLSearchParams(location.search).get('url')!
