@@ -36,14 +36,19 @@ export async function loadKimiAuthTokens(): Promise<KimiTokens | null> {
   return null
 }
 
-export async function readPageContent(tabId: number): Promise<string | undefined> {
+export async function readPageContent(tabId: number): Promise<{ html: string; text: string }> {
   try {
     const results = await browser.scripting.executeScript({
       target: { tabId },
-      func: () => document.body.innerText,
+      func: () => ({ html: document.documentElement.outerHTML, text: document.body.innerText }),
     })
-    return results[0]?.result?.trim()
+    const { html, text } = results[0].result
+    return {
+      html: '<!DOCTYPE HTML>' + '\n' + html.trim(),
+      text: text.trim(),
+    }
   } catch (e) {
     console.error('executeScript', e)
+    return { html: '', text: '' }
   }
 }

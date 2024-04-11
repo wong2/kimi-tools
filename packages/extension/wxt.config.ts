@@ -8,7 +8,7 @@ export default defineConfig({
     version: '1.5.0',
     action: {},
     permissions: ['sidePanel', 'activeTab', 'storage', 'scripting', 'notifications'],
-    host_permissions: ['https://*.moonshot.cn/*'],
+    host_permissions: ['https://*.moonshot.cn/*', 'https://*.volces.com/*'],
     commands: {
       _execute_action: {
         suggested_key: {

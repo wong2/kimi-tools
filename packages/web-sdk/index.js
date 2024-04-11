@@ -77,13 +77,62 @@ class KimiWebClient {
     }
   }
 
+  async preSignUrl(filename) {
+    const resp = await this.request('https://kimi.moonshot.cn/api/pre-sign-url', {
+      method: 'POST',
+      body: {
+        action: 'file',
+        name: filename,
+      },
+    })
+    return {
+      url: resp.url,
+      objectName: resp.object_name,
+    }
+  }
+
+  async uploadFile(objectName, url, file) {
+    await ofetch(url, { method: 'PUT', body: file })
+    const resp = await this.request('https://kimi.moonshot.cn/api/file', {
+      method: 'POST',
+      body: {
+        type: 'file',
+        name: file.name,
+        object_name: objectName,
+      },
+    })
+    return {
+      id: resp.id,
+    }
+  }
+
+  async parseProcess(fileId, options = {}) {
+    const streamBody = await this.request('https://kimi.moonshot.cn/api/file/parse_process', {
+      method: 'POST',
+      body: {
+        ids: [fileId],
+      },
+      signal: options.signal,
+      responseType: 'stream',
+    })
+    const eventStream = streamBody.pipeThrough(new TextDecoderStream()).pipeThrough(new EventSourceParserStream())
+    for await (const message of streamAsyncIterable(eventStream)) {
+      if (message.type === 'event') {
+        const payload = JSON.parse(message.data)
+        if (payload.status !== 'parsing') {
+          return payload.status
+        }
+      }
+    }
+  }
+
   async *sendMessage(chatId, content, options = {}) {
     const url = `https://kimi.moonshot.cn/api/chat/${chatId}/completion/stream`
     const streamBody = await this.request(url, {
       method: 'POST',
       body: {
         messages: [{ role: 'user', content: content }],
-        refs: [],
+        refs: options.fileId ? [options.fileId] : [],
         use_search: options.useSearch || false,
       },
       signal: options.signal,

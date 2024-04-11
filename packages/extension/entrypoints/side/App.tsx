@@ -1,47 +1,15 @@
 import { KimiWebClient } from '@kimi-tools/web-sdk'
-import { FC, PropsWithChildren, useCallback, useEffect, useState } from 'react'
+import { FC, useCallback, useEffect, useState } from 'react'
 import Markdown from 'react-markdown'
 import { buildPrompt } from '~/services/prompt'
+import { Link, RatingLink } from './Link'
 import { posthog } from './posthog'
 import { KimiTokens, loadKimiAuthTokens, loadRefreshTokenFromTab, readPageContent, setKimiAuthTokens } from './utils'
 
 const pageUrl = new URLSearchParams(location.search).get('url')!
 const tabId = new URLSearchParams(location.search).get('tabId')!
 
-const Link: FC<PropsWithChildren<{ href: string }>> = ({ href, children }) => (
-  <span
-    className="text-blue-500 text-sm mt-3 font-medium block cursor-pointer"
-    onClick={() => browser.tabs.create({ url: href })}
-  >
-    {children}
-  </span>
-)
-
-const RatingLink: FC = () => {
-  const [show, setShow] = useState(false)
-
-  useEffect(() => {
-    storage.getItem<number>('local:open_times').then((value) => {
-      const openTimes = (value || 0) + 1
-      storage.setItem('local:open_times', openTimes)
-      if (openTimes === 3) {
-        setShow(true)
-      }
-    })
-  }, [])
-
-  if (!show) {
-    return null
-  }
-
-  return (
-    <Link href="https://chromewebstore.google.com/detail/kimi-copilot/icmdpfpmbfijfllafmfogmdabhijlehn/reviews">
-      给个好评
-    </Link>
-  )
-}
-
-const SummaryPage: FC<{ tokens: KimiTokens; pageContent: string }> = ({ tokens, pageContent }) => {
+const SummaryPage: FC<{ tokens: KimiTokens }> = ({ tokens }) => {
   const [summary, setSummary] = useState('')
   const [chatId, setChatId] = useState('')
   const [error, setError] = useState('')
@@ -57,9 +25,24 @@ const SummaryPage: FC<{ tokens: KimiTokens; pageContent: string }> = ({ tokens, 
           setKimiAuthTokens(tokens)
         },
       })
+      const { html, text } = await readPageContent(+tabId)
+      let fileId: string | undefined
+      try {
+        const attachment = new File([html], 'webpage.html', { type: 'text/html' })
+        const { url, objectName } = await client.preSignUrl(attachment.name)
+        const file = await client.uploadFile(objectName, url, attachment)
+        const parseStatus = await client.parseProcess(file.id, { signal: controller.signal })
+        if (parseStatus !== 'parsed') {
+          throw new Error(`parse status: ${parseStatus}`)
+        }
+        fileId = file.id
+      } catch (e) {
+        console.error('file upload error', e)
+      }
+      console.debug('fileId', fileId)
       const chat = await client.createChat()
-      const prompt = await buildPrompt(pageUrl, pageContent)
-      for await (const event of client.sendMessage(chat.id, prompt, { signal: controller.signal })) {
+      const prompt = await buildPrompt(fileId ? '' : text)
+      for await (const event of client.sendMessage(chat.id, prompt, { fileId, signal: controller.signal })) {
         if (event.type === 'message') {
           setSummary(event.data)
         } else if (event.type === 'urls') {
@@ -147,11 +130,9 @@ const Login: FC<{ setTokens: (tokens: KimiTokens) => void }> = (props) => {
 export default function App() {
   const [tokens, setTokens] = useState<KimiTokens | null>(null)
   const [loading, setLoading] = useState(true)
-  const [pageContent, setPageContent] = useState('')
 
   useEffect(() => {
-    Promise.all([loadKimiAuthTokens(), readPageContent(+tabId)]).then(([tokens, content]) => {
-      setPageContent(content || '')
+    loadKimiAuthTokens().then((tokens) => {
       if (tokens) {
         setTokens(tokens)
       }
@@ -166,5 +147,5 @@ export default function App() {
   if (!tokens) {
     return <Login setTokens={setTokens} />
   }
-  return <SummaryPage tokens={tokens} pageContent={pageContent} />
+  return <SummaryPage tokens={tokens} />
 }

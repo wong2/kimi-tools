@@ -18,11 +18,11 @@ export async function setCustomPrompt(prompt: string) {
   }
 }
 
-export async function buildPrompt(pageUrl: string, pageContent: string) {
+export async function buildPrompt(pageContent: string) {
   const customPrompt = await loadCustomPrompt()
-  let prompt = `${customPrompt || DEFAULT_PROMPT}\n\n文章链接：<url>${pageUrl}</url>`
+  let prompt = customPrompt || DEFAULT_PROMPT
   if (pageContent) {
-    prompt += `\n\n如果你无法访问这个链接，请根据下面的文本内容回答：\n${pageContent}`
+    prompt += `\n\n${pageContent}`
   }
   return prompt
 }
