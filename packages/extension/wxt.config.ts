@@ -7,7 +7,7 @@ export default defineConfig({
     description: '用Kimi AI一键总结网页内容',
     version: '1.5.0',
     action: {},
-    permissions: ['sidePanel', 'activeTab', 'storage', 'scripting'],
+    permissions: ['sidePanel', 'activeTab', 'storage', 'scripting', 'notifications'],
     host_permissions: ['https://*.moonshot.cn/*'],
     commands: {
       _execute_action: {
