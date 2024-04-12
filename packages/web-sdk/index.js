@@ -77,33 +77,17 @@ class KimiWebClient {
     }
   }
 
-  async preSignUrl(filename) {
-    const resp = await this.request('https://kimi.moonshot.cn/api/pre-sign-url', {
+  async uploadFile(file) {
+    const { url: uploadUrl, object_name } = await this.request('https://kimi.moonshot.cn/api/pre-sign-url', {
       method: 'POST',
-      body: {
-        action: 'file',
-        name: filename,
-      },
+      body: { action: 'file', name: file.name },
     })
-    return {
-      url: resp.url,
-      objectName: resp.object_name,
-    }
-  }
-
-  async uploadFile(objectName, url, file) {
-    await ofetch(url, { method: 'PUT', body: file })
+    await ofetch(uploadUrl, { method: 'PUT', body: file })
     const resp = await this.request('https://kimi.moonshot.cn/api/file', {
       method: 'POST',
-      body: {
-        type: 'file',
-        name: file.name,
-        object_name: objectName,
-      },
+      body: { type: 'file', name: file.name, object_name },
     })
-    return {
-      id: resp.id,
-    }
+    return { id: resp.id }
   }
 
   async parseProcess(fileId, options = {}) {

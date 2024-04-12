@@ -5,6 +5,7 @@ import { posthog } from '~/services/posthog'
 import { buildPrompt } from '~/services/prompt'
 import { Link, RatingLink } from './Link'
 import { KimiTokens, loadKimiAuthTokens, loadRefreshTokenFromTab, readPageContent, setKimiAuthTokens } from './utils'
+import './content.css'
 
 const pageUrl = new URLSearchParams(location.search).get('url')!
 const tabId = new URLSearchParams(location.search).get('tabId')!
@@ -29,8 +30,7 @@ const SummaryPage: FC<{ tokens: KimiTokens }> = ({ tokens }) => {
       let fileId: string | undefined
       try {
         const attachment = new File([html], 'webpage.html', { type: 'text/html' })
-        const { url, objectName } = await client.preSignUrl(attachment.name)
-        const file = await client.uploadFile(objectName, url, attachment)
+        const file = await client.uploadFile(attachment)
         const parseStatus = await client.parseProcess(file.id, { signal: controller.signal })
         if (parseStatus !== 'parsed') {
           throw new Error(`parse status: ${parseStatus}`)
@@ -40,6 +40,9 @@ const SummaryPage: FC<{ tokens: KimiTokens }> = ({ tokens }) => {
         console.error('file upload error', e)
       }
       console.debug('fileId', fileId)
+      if (!fileId && !text) {
+        throw new Error('无法获取该网页内容，换个页面试试吧')
+      }
       const chat = await client.createChat()
       const prompt = await buildPrompt(fileId ? '' : text)
       for await (const event of client.sendMessage(chat.id, prompt, { fileId, signal: controller.signal })) {
@@ -72,9 +75,7 @@ const SummaryPage: FC<{ tokens: KimiTokens }> = ({ tokens }) => {
         </span>
       </div>
       {summary ? (
-        <article className="prose prose-sm dark:prose-invert">
-          <Markdown>{summary}</Markdown>
-        </article>
+        <Markdown className="prose prose-sm dark:prose-invert markdown-body">{summary}</Markdown>
       ) : (
         !error && <Generating />
       )}

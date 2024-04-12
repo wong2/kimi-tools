@@ -1,3 +1,4 @@
+import sanitize from 'sanitize-html'
 import { storage } from 'wxt/storage'
 
 export interface KimiTokens {
@@ -36,15 +37,31 @@ export async function loadKimiAuthTokens(): Promise<KimiTokens | null> {
   return null
 }
 
+function buildHTML(title: string, bodyHtml: string) {
+  const body = sanitize(bodyHtml).trim()
+  const result = `<!DOCTYPE html>
+<html>
+<title>${title}</title>
+<body>
+${body}
+</body>
+</html>`
+  return result
+}
+
 export async function readPageContent(tabId: number): Promise<{ html: string; text: string }> {
   try {
     const results = await browser.scripting.executeScript({
       target: { tabId },
-      func: () => ({ html: document.documentElement.outerHTML, text: document.body.innerText }),
+      func: () => ({
+        title: document.title,
+        html: document.body.outerHTML,
+        text: document.body.innerText,
+      }),
     })
-    const { html, text } = results[0].result
+    const { title, html, text } = results[0].result
     return {
-      html: '<!DOCTYPE HTML>' + '\n' + html.trim(),
+      html: buildHTML(title, html),
       text: text.trim(),
     }
   } catch (e) {
