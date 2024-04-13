@@ -44,7 +44,7 @@ const SummaryPage: FC<{ tokens: KimiTokens }> = ({ tokens }) => {
         throw new Error('无法获取该网页内容，换个页面试试吧')
       }
       const chat = await client.createChat()
-      const prompt = await buildPrompt(fileId ? '' : text)
+      const prompt = await buildPrompt(pageUrl, fileId ? '' : text)
       for await (const event of client.sendMessage(chat.id, prompt, { fileId, signal: controller.signal })) {
         if (event.type === 'message') {
           setSummary(event.data)

@@ -12,9 +12,10 @@ export async function setCustomPrompt(prompt: string) {
   }
 }
 
-export async function buildPrompt(pageContent: string) {
+export async function buildPrompt(pageUrl: string, pageContent: string) {
   const customPrompt = await loadCustomPrompt()
   let prompts = [customPrompt || DEFAULT_PROMPT]
+  prompts.push(`网页链接：${pageUrl}`)
   if (pageContent) {
     prompts.push(pageContent)
   }
