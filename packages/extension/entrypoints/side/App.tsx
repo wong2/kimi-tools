@@ -26,18 +26,20 @@ const SummaryPage: FC<{ tokens: KimiTokens }> = ({ tokens }) => {
           setKimiAuthTokens(tokens)
         },
       })
-      const { html, text } = await readPageContent(+tabId)
+      const { title, html, text } = await readPageContent(+tabId)
       let fileId: string | undefined
-      try {
-        const attachment = new File([html], 'webpage.html', { type: 'text/html' })
-        const file = await client.uploadFile(attachment)
-        const parseStatus = await client.parseProcess(file.id, { signal: controller.signal })
-        if (parseStatus !== 'parsed') {
-          throw new Error(`parse status: ${parseStatus}`)
+      if (html) {
+        try {
+          const attachment = new File([html], `${title || 'webpage'}.html`, { type: 'text/html' })
+          const file = await client.uploadFile(attachment)
+          const parseStatus = await client.parseProcess(file.id, { signal: controller.signal })
+          if (parseStatus !== 'parsed') {
+            throw new Error(`parse status: ${parseStatus}`)
+          }
+          fileId = file.id
+        } catch (e) {
+          console.error('file upload error', e)
         }
-        fileId = file.id
-      } catch (e) {
-        console.error('file upload error', e)
       }
       console.debug('fileId', fileId)
       if (!fileId && !text) {

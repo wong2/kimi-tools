@@ -49,7 +49,7 @@ ${body}
   return result
 }
 
-export async function readPageContent(tabId: number): Promise<{ html: string; text: string }> {
+export async function readPageContent(tabId: number): Promise<{ title: string; html: string; text: string }> {
   try {
     const results = await browser.scripting.executeScript({
       target: { tabId },
@@ -61,11 +61,12 @@ export async function readPageContent(tabId: number): Promise<{ html: string; te
     })
     const { title, html, text } = results[0].result
     return {
+      title,
       html: buildHTML(title, html),
       text: text.trim(),
     }
   } catch (e) {
     console.error('executeScript', e)
-    return { html: '', text: '' }
+    return { title: '', html: '', text: '' }
   }
 }
