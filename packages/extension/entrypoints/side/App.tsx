@@ -43,7 +43,11 @@ const SummaryPage: FC<{ tokens: KimiTokens }> = ({ tokens }) => {
       }
       console.debug('fileId', fileId)
       if (!fileId && !text) {
-        throw new Error('无法获取该网页内容，换个页面试试吧')
+        throw new Error(
+          pageUrl.includes('chromewebstore.google.com')
+            ? '由于技术限制，无法获取Chrome Web Store内容，换个页面试试吧'
+            : '无法获取该网页内容，换个页面试试吧',
+        )
       }
       const chat = await client.createChat()
       const prompt = await buildPrompt(pageUrl, fileId ? '' : text)
