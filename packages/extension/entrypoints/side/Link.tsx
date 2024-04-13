@@ -23,7 +23,7 @@ export const RatingLink: FC = () => {
   }, [])
 
   if (!show) {
-    return null
+    return <Link href="https://chromewebstore.google.com/detail/icmdpfpmbfijfllafmfogmdabhijlehn/support">反馈</Link>
   }
 
   return (
