@@ -1,5 +1,6 @@
 import sanitize from 'sanitize-html'
 import { storage } from 'wxt/storage'
+import { BILIBILI_VIDEO_REGEX, readBilibiliVideoContent } from './bilibili'
 
 export interface KimiTokens {
   refreshToken: string
@@ -49,24 +50,37 @@ ${body}
   return result
 }
 
-export async function readPageContent(tabId: number): Promise<{ title: string; html: string; text: string }> {
-  try {
-    const results = await browser.scripting.executeScript({
-      target: { tabId },
-      func: () => ({
-        title: document.title,
-        html: document.body.outerHTML,
-        text: document.body.innerText,
+export async function readPageContent(
+  tabId: number,
+  tabUrl: string,
+): Promise<{ contentFile?: File; fallbackText: string }> {
+  if (BILIBILI_VIDEO_REGEX.test(tabUrl)) {
+    const [contentFile, fallbackText] = await Promise.all([
+      readBilibiliVideoContent(tabId, tabUrl).catch((e) => {
+        console.error('readBilibiliVideoContent', e)
+        return undefined
       }),
-    })
-    const { title, html, text } = results[0].result
-    return {
-      title,
-      html: buildHTML(title, html),
-      text: text.trim(),
-    }
-  } catch (e) {
-    console.error('executeScript', e)
-    return { title: '', html: '', text: '' }
+      browser.scripting
+        .executeScript({
+          target: { tabId },
+          func: () => document.body.innerText,
+        })
+        .then((results) => results[0].result),
+    ])
+    return { contentFile, fallbackText }
+  }
+  const results = await browser.scripting.executeScript({
+    target: { tabId },
+    func: () => ({
+      title: document.title,
+      bodyHtml: document.body.outerHTML,
+      text: document.body.innerText,
+    }),
+  })
+  const { title, bodyHtml, text } = results[0].result
+  const contentFile = new File([buildHTML(title, bodyHtml)], `${title || 'webpage'}.html`, { type: 'text/html' })
+  return {
+    contentFile,
+    fallbackText: text.trim(),
   }
 }

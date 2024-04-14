@@ -26,12 +26,14 @@ const SummaryPage: FC<{ tokens: KimiTokens }> = ({ tokens }) => {
           setKimiAuthTokens(tokens)
         },
       })
-      const { title, html, text } = await readPageContent(+tabId)
+      const { contentFile, fallbackText } = await readPageContent(+tabId, pageUrl).catch((e) => {
+        console.error(e)
+        return { contentFile: undefined, fallbackText: '' }
+      })
       let fileId: string | undefined
-      if (html) {
+      if (contentFile) {
         try {
-          const attachment = new File([html], `${title || 'webpage'}.html`, { type: 'text/html' })
-          const file = await client.uploadFile(attachment)
+          const file = await client.uploadFile(contentFile)
           const parseStatus = await client.parseProcess(file.id, { signal: controller.signal })
           if (parseStatus !== 'parsed') {
             throw new Error(`parse status: ${parseStatus}`)
@@ -42,7 +44,7 @@ const SummaryPage: FC<{ tokens: KimiTokens }> = ({ tokens }) => {
         }
       }
       console.debug('fileId', fileId)
-      if (!fileId && !text) {
+      if (!fileId && !fallbackText) {
         throw new Error(
           pageUrl.includes('chromewebstore.google.com')
             ? '由于技术限制，无法获取Chrome Web Store内容，换个页面试试吧'
@@ -50,7 +52,7 @@ const SummaryPage: FC<{ tokens: KimiTokens }> = ({ tokens }) => {
         )
       }
       const chat = await client.createChat()
-      const prompt = await buildPrompt(pageUrl, fileId ? '' : text)
+      const prompt = await buildPrompt(pageUrl, fileId ? '' : fallbackText)
       for await (const event of client.sendMessage(chat.id, prompt, { fileId, signal: controller.signal })) {
         if (event.type === 'message') {
           setSummary(event.data)
