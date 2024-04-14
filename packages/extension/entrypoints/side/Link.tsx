@@ -1,13 +1,19 @@
 import { FC, PropsWithChildren, useEffect, useState } from 'react'
 
-export const Link: FC<PropsWithChildren<{ href: string }>> = ({ href, children }) => (
-  <span
-    className="text-blue-500 text-sm mt-3 font-medium block cursor-pointer"
-    onClick={() => browser.tabs.create({ url: href })}
-  >
-    {children}
-  </span>
-)
+export const Link: FC<PropsWithChildren<{ href?: string; onClick?: () => void }>> = (props) => {
+  const onClick = () => {
+    if (props.href) {
+      browser.tabs.create({ url: props.href })
+    } else if (props.onClick) {
+      props.onClick()
+    }
+  }
+  return (
+    <span className="text-blue-500 text-sm mt-3 font-medium block cursor-pointer" onClick={onClick}>
+      {props.children}
+    </span>
+  )
+}
 
 export const RatingLink: FC = () => {
   const [show, setShow] = useState(false)
