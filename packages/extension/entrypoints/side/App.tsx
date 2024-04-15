@@ -4,8 +4,9 @@ import Markdown from 'react-markdown'
 import { posthog } from '~/services/posthog'
 import { buildPrompt } from '~/services/prompt'
 import { Link, RatingLink } from './Link'
-import { KimiTokens, loadKimiAuthTokens, loadRefreshTokenFromTab, readPageContent, setKimiAuthTokens } from './utils'
 import './content.css'
+import { readPageContent } from './parser'
+import { KimiTokens, loadKimiAuthTokens, loadRefreshTokenFromTab, setKimiAuthTokens } from './utils'
 
 const pageUrl = new URLSearchParams(location.search).get('url')!
 const tabId = new URLSearchParams(location.search).get('tabId')!
