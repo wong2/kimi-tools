@@ -1,15 +1,20 @@
+function sendNotification(message: string) {
+  browser.notifications.create({
+    type: 'basic',
+    iconUrl: 'icon-128.png',
+    title: 'Kimi Copilot',
+    message,
+  })
+}
+
 export default defineBackground(() => {
   browser.action.onClicked.addListener((tab) => {
     if (!tab.id || !tab.url || !(tab.url.startsWith('http') || tab.url.startsWith('file://'))) {
+      sendNotification('请在网页上使用')
       return
     }
     if (!chrome.sidePanel || !chrome.sidePanel.open) {
-      browser.notifications.create({
-        type: 'basic',
-        iconUrl: 'icon-128.png',
-        title: 'Kimi Copilot',
-        message: '不支持当前浏览器，请使用最新的原生Chrome',
-      })
+      sendNotification('不支持当前浏览器，请使用最新的原生Chrome')
       return
     }
     chrome.sidePanel.setOptions({
