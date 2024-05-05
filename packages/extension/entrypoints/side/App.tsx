@@ -92,7 +92,7 @@ const SummaryPage: FC<{ tokens: KimiTokens }> = ({ tokens }) => {
       {!!chatId && (
         <div className="flex flex-row justify-between items-center mt-3">
           <div className="flex flex-row gap-3">
-            <Link href={`https://kimi.moonshot.cn/chat/${chatId}`}>去Kimi继续对话</Link>
+            <Link href={`https://kimi.moonshot.cn/chat/${chatId}?utm_source=copilot_ext`}>去Kimi继续对话</Link>
             <Link onClick={() => navigator.clipboard.writeText(summary)}>复制</Link>
           </div>
           <RatingLink />

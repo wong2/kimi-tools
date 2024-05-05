@@ -1,7 +1,9 @@
 import { posthog } from '@/services/posthog'
 import { DEFAULT_PROMPT, loadCustomPrompt, setCustomPrompt } from '@/services/prompt'
+import { ArrowTopRightOnSquareIcon } from '@heroicons/react/16/solid'
 import { Card, CardActions, CardContent, Chip, Divider, Snackbar, Textarea, Typography } from '@mui/joy'
 import Button from '@mui/joy/Button'
+import Link from '@mui/joy/Link'
 import { useEffect, useState } from 'react'
 
 export default function App() {
@@ -38,7 +40,20 @@ export default function App() {
   return (
     <div className="max-w-[500px] mx-auto">
       <Card>
-        <Typography level="title-lg">选项</Typography>
+        <div className="flex flex-row items-center justify-between">
+          <Typography level="title-lg">选项</Typography>
+          <div className="flex flex-row items-center gap-0.5">
+            <ArrowTopRightOnSquareIcon className="size-4" />
+            <Link
+              component="button"
+              level="body-xs"
+              color="neutral"
+              onClick={() => browser.tabs.create({ url: 'chrome://extensions/shortcuts' })}
+            >
+              快捷键
+            </Link>
+          </div>
+        </div>
         <Divider inset="none" />
         <CardContent>
           <div className="flex flex-row items-center justify-between mb-1">
