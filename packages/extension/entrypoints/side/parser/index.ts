@@ -1,6 +1,7 @@
 import sanitize from 'sanitize-html'
 import { BILIBILI_VIDEO_REGEX, readBilibiliVideoContent } from './bilibili'
 import { getPdfFile } from './pdf'
+import { YOUTUBE_VIDEO_REGEX, readYoutubeVideoContent } from './youtube'
 
 function buildHTML(title: string, bodyHtml: string) {
   const body = sanitize(bodyHtml).trim()
@@ -14,22 +15,36 @@ ${body}
   return result
 }
 
+async function readFallbackText(tabId: number) {
+  return browser.scripting
+    .executeScript({
+      target: { tabId },
+      func: () => document.body.innerText,
+    })
+    .then((results) => results[0].result)
+}
+
 export async function readPageContent(
   tabId: number,
   tabUrl: string,
 ): Promise<{ contentFile?: File; fallbackText: string }> {
+  if (YOUTUBE_VIDEO_REGEX.test(tabUrl)) {
+    const [contentFile, fallbackText] = await Promise.all([
+      readYoutubeVideoContent(tabId).catch((e) => {
+        console.error('readYoutubeVideoContent', e)
+        return undefined
+      }),
+      readFallbackText(tabId),
+    ])
+    return { contentFile, fallbackText }
+  }
   if (BILIBILI_VIDEO_REGEX.test(tabUrl)) {
     const [contentFile, fallbackText] = await Promise.all([
       readBilibiliVideoContent(tabId, tabUrl).catch((e) => {
         console.error('readBilibiliVideoContent', e)
         return undefined
       }),
-      browser.scripting
-        .executeScript({
-          target: { tabId },
-          func: () => document.body.innerText,
-        })
-        .then((results) => results[0].result),
+      readFallbackText(tabId),
     ])
     return { contentFile, fallbackText }
   }
