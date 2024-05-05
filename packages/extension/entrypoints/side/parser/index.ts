@@ -1,5 +1,6 @@
 import sanitize from 'sanitize-html'
 import { BILIBILI_VIDEO_REGEX, readBilibiliVideoContent } from './bilibili'
+import { getPdfFile } from './pdf'
 
 function buildHTML(title: string, bodyHtml: string) {
   const body = sanitize(bodyHtml).trim()
@@ -31,6 +32,16 @@ export async function readPageContent(
         .then((results) => results[0].result),
     ])
     return { contentFile, fallbackText }
+  }
+  if (/\.pdf$/i.test(tabUrl) || /arxiv\.org\/pdf\//.test(tabUrl)) {
+    const contentFile = await getPdfFile(tabId).catch((e) => {
+      console.error('getPdfFile', e)
+      return undefined
+    })
+    return {
+      contentFile,
+      fallbackText: '',
+    }
   }
   const results = await browser.scripting.executeScript({
     target: { tabId },
