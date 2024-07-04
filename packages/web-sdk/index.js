@@ -141,4 +141,4 @@ class KimiWebClient {
   }
 }
 
-export { KimiWebClient }
+export { KimiWebClient, FetchError }

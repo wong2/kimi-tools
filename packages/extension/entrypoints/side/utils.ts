@@ -13,6 +13,10 @@ export async function setKimiAuthTokens(tokens: KimiTokens) {
   await storage.setItem('local:kimi_tokens', tokens)
 }
 
+export async function clearKimiAuthTokens() {
+  await storage.removeItem('local:kimi_tokens')
+}
+
 export async function loadRefreshTokenFromTab(tabId: number): Promise<string | null> {
   const results = await browser.scripting.executeScript({
     target: { tabId },

@@ -1,4 +1,4 @@
-import { KimiWebClient } from '@kimi-tools/web-sdk'
+import { KimiWebClient, FetchError } from '@kimi-tools/web-sdk'
 import { FC, useCallback, useEffect, useState } from 'react'
 import Markdown from 'react-markdown'
 import { posthog } from '~/services/posthog'
@@ -6,12 +6,18 @@ import { buildPrompt } from '~/services/prompt'
 import { Link, RatingLink } from './Link'
 import './content.css'
 import { readPageContent } from './parser'
-import { KimiTokens, loadKimiAuthTokens, loadRefreshTokenFromTab, setKimiAuthTokens } from './utils'
+import {
+  KimiTokens,
+  loadKimiAuthTokens,
+  loadRefreshTokenFromTab,
+  setKimiAuthTokens,
+  clearKimiAuthTokens,
+} from './utils'
 
 const pageUrl = new URLSearchParams(location.search).get('url')!
 const tabId = new URLSearchParams(location.search).get('tabId')!
 
-const SummaryPage: FC<{ tokens: KimiTokens }> = ({ tokens }) => {
+const SummaryPage: FC<{ tokens: KimiTokens; onTokensExpired: () => void }> = ({ tokens, onTokensExpired }) => {
   const [summary, setSummary] = useState('')
   const [chatId, setChatId] = useState('')
   const [error, setError] = useState('')
@@ -65,7 +71,12 @@ const SummaryPage: FC<{ tokens: KimiTokens }> = ({ tokens }) => {
     }
     const abortController = new AbortController()
     summarize(abortController).catch((err) => {
-      if (!abortController.signal.aborted) {
+      if (abortController.signal.aborted) {
+        return
+      }
+      if (err instanceof FetchError && err.status === 401) {
+        onTokensExpired?.()
+      } else {
         setError(err.message || '未知错误')
       }
     })
@@ -154,11 +165,16 @@ export default function App() {
     posthog.capture('$pageview', { $current_url: 'side.html', tabUrl: pageUrl })
   }, [])
 
+  const onTokensExpired = useCallback(() => {
+    clearKimiAuthTokens()
+    setTokens(null)
+  }, [])
+
   if (loading) {
     return <span>...</span>
   }
   if (!tokens) {
     return <Login setTokens={setTokens} />
   }
-  return <SummaryPage tokens={tokens} />
+  return <SummaryPage tokens={tokens} onTokensExpired={onTokensExpired} />
 }
