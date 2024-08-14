@@ -29,7 +29,7 @@ export const RatingLink: FC = () => {
   }, [])
 
   if (!show) {
-    return <Link href="https://chromewebstore.google.com/detail/icmdpfpmbfijfllafmfogmdabhijlehn/support">反馈</Link>
+    return <Link href="https://buymeacoffee.com/wong2">请杯咖啡</Link>
   }
 
   return (
