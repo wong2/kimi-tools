@@ -103,7 +103,7 @@ const SummaryPage: FC<{ tokens: KimiTokens; onTokensExpired: () => void }> = ({ 
       {!!chatId && (
         <div className="flex flex-row justify-between items-center mt-3">
           <div className="flex flex-row gap-3">
-            <Link href={`https://kimi.moonshot.cn/chat/${chatId}?utm_source=copilot_ext`}>去Kimi继续对话</Link>
+            <Link href={`https://www.kimi.com/chat/${chatId}?utm_source=copilot_ext`}>去Kimi继续对话</Link>
             <Link onClick={() => navigator.clipboard.writeText(summary)}>复制</Link>
           </div>
           <RatingLink />
@@ -126,7 +126,7 @@ const Generating: FC = () => {
 
 const Login: FC<{ setTokens: (tokens: KimiTokens) => void }> = (props) => {
   const login = useCallback(async () => {
-    const tab = await browser.tabs.create({ url: 'https://kimi.moonshot.cn/', active: true })
+    const tab = await browser.tabs.create({ url: 'https://www.kimi.com/', active: true })
     const timer = setInterval(async () => {
       try {
         const refreshToken = await loadRefreshTokenFromTab(tab.id!)

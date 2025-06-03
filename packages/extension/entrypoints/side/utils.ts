@@ -30,7 +30,7 @@ export async function loadKimiAuthTokens(): Promise<KimiTokens | null> {
   if (tokens) {
     return tokens
   }
-  const tab = await browser.tabs.create({ url: 'https://kimi.moonshot.cn/', active: false })
+  const tab = await browser.tabs.create({ url: 'https://www.kimi.com/', active: false })
   const refreshToken = await loadRefreshTokenFromTab(tab.id!)
   await browser.tabs.remove(tab.id!)
   if (refreshToken) {

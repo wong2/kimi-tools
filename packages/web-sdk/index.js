@@ -32,7 +32,7 @@ class KimiWebClient {
         method: options.method,
         headers: {
           Authorization: `Bearer ${this.accessToken}`,
-          Referer: 'https://kimi.moonshot.cn/',
+          Referer: 'https://www.kimi.com/',
         },
         body: options.body,
         signal: options.signal,
@@ -51,7 +51,7 @@ class KimiWebClient {
   }
 
   async refreshAccessToken() {
-    const resp = await ofetch('https://kimi.moonshot.cn/api/auth/token/refresh', {
+    const resp = await ofetch('https://www.kimi.com/api/auth/token/refresh', {
       headers: {
         Authorization: `Bearer ${this.refreshToken}`,
       },
@@ -65,7 +65,7 @@ class KimiWebClient {
   }
 
   async createChat() {
-    const resp = await this.request('https://kimi.moonshot.cn/api/chat', {
+    const resp = await this.request('https://www.kimi.com/api/chat', {
       method: 'POST',
       body: {
         is_example: false,
@@ -78,12 +78,12 @@ class KimiWebClient {
   }
 
   async uploadFile(file) {
-    const { url: uploadUrl, object_name } = await this.request('https://kimi.moonshot.cn/api/pre-sign-url', {
+    const { url: uploadUrl, object_name } = await this.request('https://www.kimi.com/api/pre-sign-url', {
       method: 'POST',
       body: { action: 'file', name: file.name },
     })
     await ofetch(uploadUrl, { method: 'PUT', body: file })
-    const resp = await this.request('https://kimi.moonshot.cn/api/file', {
+    const resp = await this.request('https://www.kimi.com/api/file', {
       method: 'POST',
       body: { type: 'file', name: file.name, object_name },
     })
@@ -91,7 +91,7 @@ class KimiWebClient {
   }
 
   async parseProcess(fileId, options = {}) {
-    const streamBody = await this.request('https://kimi.moonshot.cn/api/file/parse_process', {
+    const streamBody = await this.request('https://www.kimi.com/api/file/parse_process', {
       method: 'POST',
       body: {
         ids: [fileId],
@@ -111,7 +111,7 @@ class KimiWebClient {
   }
 
   async *sendMessage(chatId, content, options = {}) {
-    const url = `https://kimi.moonshot.cn/api/chat/${chatId}/completion/stream`
+    const url = `https://www.kimi.com/api/chat/${chatId}/completion/stream`
     const streamBody = await this.request(url, {
       method: 'POST',
       body: {
