@@ -8,7 +8,7 @@ export default defineConfig({
   manifest: {
     name: 'Kimi Copilot - 网页总结助手',
     description: '用Kimi AI一键总结网页内容',
-    version: '1.11.0',
+    version: '1.12.0',
     action: {},
     permissions: ['sidePanel', 'activeTab', 'storage', 'scripting', 'notifications'],
     host_permissions: ['https://*.kimi.com/*', 'https://*.volces.com/*'],
