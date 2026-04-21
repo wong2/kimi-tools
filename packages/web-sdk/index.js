@@ -39,12 +39,13 @@ class KimiWebClient {
         responseType: options.responseType,
       })
     } catch (err) {
+      if (options.signal?.aborted) {
+        throw err
+      }
       console.error(err)
-      if (err instanceof FetchError) {
-        if (err.response?.status === 401) {
-          await this.refreshAccessToken()
-          return this.request(url, options)
-        }
+      if (err instanceof FetchError && err.response?.status === 401) {
+        await this.refreshAccessToken()
+        return this.request(url, options)
       }
       throw err
     }
@@ -133,6 +134,10 @@ class KimiWebClient {
           yield { type: 'message', data: answer }
         } else if (payload.event === 'content' && payload.msg?.url_refs) {
           yield { type: 'urls', data: payload.msg.url_refs }
+        } else if (payload.event === 'error') {
+          const err = new Error(payload.error?.message || 'Kimi 返回错误')
+          err.errorType = payload.error?.error_type
+          throw err
         } else if (payload.event === 'all_done') {
           break
         }

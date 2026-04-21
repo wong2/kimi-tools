@@ -60,12 +60,17 @@ const SummaryPage: FC<{ tokens: KimiTokens; onTokensExpired: () => void }> = ({ 
       }
       const chat = await client.createChat()
       const prompt = await buildPrompt(pageUrl, fileId ? '' : fallbackText)
+      let received = false
       for await (const event of client.sendMessage(chat.id, prompt, { fileId, signal: controller.signal })) {
         if (event.type === 'message') {
+          received = true
           setSummary(event.data)
         } else if (event.type === 'urls') {
           console.debug('urls', event.data)
         }
+      }
+      if (!received) {
+        throw new Error('Kimi 未返回内容，请稍后再试')
       }
       setChatId(chat.id)
     }
@@ -101,7 +106,7 @@ const SummaryPage: FC<{ tokens: KimiTokens; onTokensExpired: () => void }> = ({ 
       ) : (
         !error && <Generating />
       )}
-      {!!error && <div className="text-red-500 text-sm mt-1">{error}</div>}
+      {!!error && <div className="text-gray-600 text-sm mt-1">{error}</div>}
       {!!chatId && (
         <div className="flex flex-row justify-between items-center mt-3">
           <div className="flex flex-row gap-3">
