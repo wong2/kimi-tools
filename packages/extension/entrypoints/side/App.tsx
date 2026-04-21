@@ -1,6 +1,6 @@
 import { KimiWebClient, FetchError } from '@kimi-tools/web-sdk'
 import { FC, useCallback, useEffect, useState } from 'react'
-import Markdown from 'react-markdown'
+import { Streamdown } from 'streamdown'
 import { posthog } from '~/services/posthog'
 import { buildPrompt } from '~/services/prompt'
 import { Link, RatingLink } from './Link'
@@ -95,7 +95,9 @@ const SummaryPage: FC<{ tokens: KimiTokens; onTokensExpired: () => void }> = ({ 
         </span>
       </div>
       {summary ? (
-        <Markdown className="prose prose-sm dark:prose-invert markdown-body">{summary}</Markdown>
+        <Streamdown className="markdown-body text-sm" controls={{ table: false }}>
+          {summary}
+        </Streamdown>
       ) : (
         !error && <Generating />
       )}

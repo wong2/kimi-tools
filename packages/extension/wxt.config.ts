@@ -2,6 +2,9 @@ import { defineConfig } from 'wxt'
 import react from '@vitejs/plugin-react'
 
 export default defineConfig({
+  runner: {
+    disabled: true,
+  },
   manifest: {
     name: 'Kimi Copilot - 网页总结助手',
     description: '用Kimi AI一键总结网页内容',
